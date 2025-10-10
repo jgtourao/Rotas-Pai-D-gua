@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Poppins", Arial, sans-serif;
-  background-position: center
+  background-position: 
     linear-gradient(rgba(0, 0, 0, 0.85), rgba(161, 158, 158, 0.85)),
     url('fundo.jpg') repeat center center;
   background-size: cover
@@ -137,5 +137,6 @@ header img {
   box-shadow: 3px 6px 12px rgba(0,0,0,0.4);
 
 }
+
 
 
