@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rotas Pai D'Água</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(161, 158, 158, 0.85)),
+        url('fundo.jpg') repeat center center;
+      background-size: contain;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    header {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    header img {
+      width: 130px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 80%;
+      max-width: 360px;
+    }
+
+    .menu-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 15px;
+      padding: 14px 22px;
+      border-radius: 30px;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      overflow: hidden;
+    }
+
+    .menu-item:hover {
+      transform: scale(1.04);
+      box-shadow: 3px 6px 12px rgba(0,0,0,0.25);
+      filter: brightness(1.1);
+    }
+
+    .azul {
+      background: linear-gradient(135deg, #00bfe8, #0284a8);
+    }
+
+    .vermelho {
+      background: linear-gradient(135deg, #f23c3c, #c72a2a);
+    }
+
+    .verde {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+    }
+
+    .menu-item::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('botao.jpg') repeat center;
+      background-size: 120px;
+      opacity: 0.35;
+      mix-blend-mode: overlay;
+      border-radius: 30px;
+    }
+
+    .menu-item img {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      padding: 5px;
+      z-index: 1;
+    }
+
+    .menu-item span {
+      z-index: 1;
+    }
+
+    #lista-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(161, 158, 158, 0.85)),
+        url('fundo.jpg') repeat center center;
+      background-size: contain;
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 80px 20px 20px 20px;
+    }
+
+    #lista-container.active {
+      display: block;
+    }
+
+    #lista-titulo {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1.8rem;
+    }
+
+    #lista-items {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .local-item {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .local-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    .local-item .icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #f23c3c, #c72a2a);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .local-item .icon svg {
+      width: 28px;
+      height: 28px;
+      fill: white;
+    }
+
+    .local-item .info {
+      flex: 1;
+    }
+
+    .local-item .nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .local-item .descricao {
+      font-size: 0.9rem;
+      color: #7f8c8d;
+    }
+
+    .local-item .arrow {
+      font-size: 1.5rem;
+      color: #95a5a6;
+    }
+
+    #map-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 1000;
+    }
+
+    #map-container.active {
+      display: block;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    #back-button,
+    #back-list-button {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1001;
+      background: linear-gradient(135deg, #00bfe8, #0284a8);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 2px 4px 10px rgba(0,0,0,0.3);
+      transition: all 0.25s ease;
+    }
+
+    #back-button:hover,
+    #back-list-button:hover {
+      transform: scale(1.05);
+      box-shadow: 3px 6px 12px rgba(0,0,0,0.4);
+    }
+
+    .map-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: white;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      width: 320px;
+      max-width: calc(100vw - 40px);
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      transition: all 0.3s ease;
+    }
+
+    .map-controls.minimized {
+      width: auto;
+      padding: 10px 15px;
+      overflow: hidden;
+    }
+
+    .map-controls.minimized .controls-content {
+      display: none;
+    }
+
+    .map-controls.active {
+      display: flex;
+    }
+
+    .controls-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+
+    .map-controls.minimized .controls-header {
+      margin-bottom: 0;
+    }
+
+    .toggle-controls-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      font-size: 18px;
+      color: #2c3e50;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-controls-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .map-controls.minimized .toggle-controls-btn {
+      transform: rotate(180deg);
+    }
+
+    .map-controls h4 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .controls-section {
+      padding: 15px 0;
+      border-top: 2px solid #ecf0f1;
+    }
+
+    .controls-section:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .controls-section h5 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .map-controls select {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .map-controls button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-calcular {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: white;
+    }
+
+    .btn-calcular:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-limpar {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+    }
+
+    .btn-limpar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-adicionar {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+    }
+
+    .btn-adicionar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+    }
+
+    .waypoints-list {
+      max-height: 150px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 5px 0;
+    }
+
+    .waypoint-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .waypoint-item .remove-btn {
+      background: #e74c3c;
+      border: none;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .route-info {
+      display: none;
+    }
+
+    .route-info p {
+      margin: 8px 0;
+      font-size: 0.9rem;
+      color: #555;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .route-info strong {
+      color: #2c3e50;
+    }
+
+    .route-instructions {
+      margin-top: 10px;
+    }
+
+    .route-instructions h5 {
+      margin: 0 0 10px 0;
+      font-size: 0.9rem;
+      color: #2c3e50;
+      font-weight: 600;
+    }
+
+    .instruction-step {
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      display: flex;
+      gap: 8px;
+    }
+
+    .instruction-step .step-number {
+      background: #3498db;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .instruction-step .step-text {
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    .locate-btn {
+      position: absolute;
+      bottom: 90px;
+      right: 20px;
+      z-index: 1001;
+      width: 50px;
+      height: 50px;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .locate-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+      background: #00bfe8;
+    }
+
+    .locate-btn:hover i {
+      color: white;
+    }
+
+    .locate-btn i {
+      font-size: 20px;
+      color: #00bfe8;
+      transition: color 0.2s;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loading-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #00bfe8;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .map-controls {
+        right: 10px;
+        top: 10px;
+        width: calc(100vw - 20px);
+      }
+
+      .locate-btn {
+        bottom: 90px;
+        right: 10px;
+      }
+
+      #back-button,
+      #back-list-button {
+        bottom: 20px;
+        left: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="logo.png" alt="Rotas Pai D'Água">
+  </header>
+
+  <div class="menu" id="main-menu">
+    <div class="menu-item azul" id="pontos-turisticos">
+      <img src="turistico.jpg" alt="">
+      <span>Pontos turísticos</span>
+    </div>
+
+    <div class="menu-item vermelho" id="praias">
+      <img src="praia.png" alt="">
+      <span>Praias</span>
+    </div>
+
+    <div class="menu-item vermelho" id="hoteis">
+      <img src="hotel.png" alt="">
+      <span>Hotéis</span>
+    </div>
+
+    <div class="menu-item azul" id="restaurantes">
+      <img src="restaurante.png" alt="">
+      <span>Restaurantes</span>
+    </div>
+
+    <div class="menu-item verde" id="criar-rota">
+      <img src="rotas.png" alt="">
+      <span>Crie sua rota</span>
+    </div>
+  </div>
+
+  <div id="lista-container">
+    <button id="back-list-button">← Voltar</button>
+    <h1 id="lista-titulo"></h1>
+    <div id="lista-items"></div>
+  </div>
+
+      <div id="map-container">
+    <button id="back-button">← Voltar</button>
+    <div id="map"></div>
+    
+    <button class="locate-btn" id="locateBtn" title="Centralizar na minha localização">
+      <i class="fas fa-crosshairs"></i>
+    </button>
+
+    <div class="map-controls" id="mapControls">
+      <div class="controls-header" id="controlsHeader">
+        <h4>🗺️ Painel de Rotas</h4>
+        <button class="toggle-controls-btn" id="toggleControlsBtn" title="Minimizar/Expandir">▼</button>
+      </div>
+      
+      <div class="controls-content">
+        <!-- Seção de Waypoints -->
+        <div class="controls-section" id="waypointsSection" style="display:none;">
+          <h5>📍 Paradas Intermediárias</h5>
+          <div id="waypointsList" class="waypoints-list"></div>
+        </div>
+
+        <!-- Seção de Configurações -->
+        <div class="controls-section">
+          <h5>⚙️ Configurações</h5>
+          <select id="modeSelect">
+            <option value="driving">🚗 De carro</option>
+            <option value="walking">🚶 A pé</option>
+          </select>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="controls-section">
+          <button class="btn-calcular" id="calcularRotaBtn">
+            📍 Traçar Rota
+          </button>
+          
+          <button class="btn-limpar" id="limparRotaBtn">
+            🗑️ Limpar Rota
+          </button>
+        </div>
+
+        <!-- Informações da Rota -->
+        <div class="controls-section" id="routeInfoSection" style="display:none;">
+          <h5>📊 Informações da Rota</h5>
+          <p><strong>Destino:</strong> <span id="info-destino">-</span></p>
+          <p><strong>Distância:</strong> <span id="info-distancia">-</span></p>
+          <p><strong>Tempo:</strong> <span id="info-tempo">-</span></p>
+          <p><strong>Modo:</strong> <span id="info-modo">-</span></p>
+        </div>
+
+        <!-- Instruções de Navegação -->
+        <div class="controls-section route-instructions" id="routeInstructions" style="display:none;">
+          <h5>🧭 Instruções de Navegação</h5>
+          <div id="instructionsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div>Carregando...</div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script>
+    const locaisData = {
+      turisticos: [
+        { nome: 'Estação das Docas', descricao: 'Complexo turístico na orla', coords: [-1.4545, -48.5030] },
+        { nome: 'Mercado Ver-o-Peso', descricao: 'Mercado histórico', coords: [-1.4558, -48.5044] },
+        { nome: 'Complexo Feliz Lusitânia', descricao: 'Conjunto histórico', coords: [-1.4570, -48.5050] },
+        { nome: 'Cidade Velha', descricao: 'Centro histórico de Belém', coords: [-1.4575, -48.5045] },
+        { nome: 'Forte do Presé pio', descricao: 'Forte histórico', coords: [-1.4575, -48.5060] },
+        { nome: 'Casa das Onze Janelas', descricao: 'Museu de arte', coords: [-1.4570, -48.5050] },
+        { nome: 'Mangal das Garças', descricao: 'Parque ambiental', coords: [-1.4590, -48.5035] },
+        { nome: 'Espaço São José Liberto', descricao: 'Centro cultural', coords: [-1.4580, -48.4970] },
+        { nome: 'Teatro da Paz', descricao: 'Teatro histórico', coords: [-1.4528, -48.4928] },
+        { nome: 'Basílica de Nazaré', descricao: 'Basílica religiosa', coords: [-1.4510, -48.4770] },
+        { nome: 'Museu Goeldi', descricao: 'Museu e zoológico', coords: [-1.4520, -48.4790] },
+        { nome: 'Bosque Rodrigues Alves', descricao: 'Parque ecológico', coords: [-1.4350, -48.4630] }
+      ],
+      praias: [
+        { nome: 'Praia do Farol - Mosqueiro', descricao: 'Praia de água doce', coords: [-1.1200, -48.4400] },
+        { nome: 'Praia do Chapéu Virado - Mosqueiro', descricao: 'Praia popular', coords: [-1.1300, -48.4500] },
+        { nome: 'Praia Grande - Mosqueiro', descricao: 'Maior praia de Mosqueiro', coords: [-1.1400, -48.4600] },
+        { nome: 'Praia do Marahú - Mosqueiro', descricao: 'Praia tranquila', coords: [-1.1100, -48.4300] },
+        { nome: 'Balneário do Marangá', descricao: 'Balneário com estrutura', coords: [-1.1700, -48.4600] },
+        { nome: 'Praia do Atalaia - Salinópolis', descricao: 'Praia do Atlântico', coords: [-0.6150, -47.3450] },
+        { nome: 'Praia do Maçarico - Salinópolis', descricao: 'Praia extensa', coords: [-0.6200, -47.3500] },
+        { nome: 'Praia do Farol Velho - Salinópolis', descricao: 'Praia com farol', coords: [-0.6240, -47.3560] },
+        { nome: 'Ilha do Marajó - Praias', descricao: 'Praias fluviais', coords: [-0.9860, -49.1060] },
+        { nome: 'Alter do Chão', descricao: 'Caribe amazônico', coords: [-2.5080, -54.9480] }
+      ],
+      hoteis: [
+        { nome: 'Grand Mercure Belém', descricao: 'Hotel de luxo', coords: [-1.4450, -48.4880] },
+        { nome: 'Radisson Hotel Belém', descricao: 'Hotel 5 estrelas', coords: [-1.4410, -48.4850] },
+        { nome: 'Soft Inn Batista Campos', descricao: 'Hotel confortável', coords: [-1.4470, -48.4820] },
+        { nome: 'Atrium Quinta de Pedras', descricao: 'Hotel boutique', coords: [-1.4400, -48.4800] },
+        { nome: 'Villa Plaza Belém', descricao: 'Hotel moderno', coords: [-1.4460, -48.4890] },
+        { nome: 'Salinas Premium Resort', descricao: 'Resort em Salinas', coords: [-0.6250, -47.3570] },
+        { nome: 'Hotel Baia do Sol - Mosqueiro', descricao: 'Hotel em Mosqueiro', coords: [-1.1250, -48.4450] },
+        { nome: 'Pousada Marajoara', descricao: 'Pousada no Marajó', coords: [-0.9800, -49.1000] }
+      ],
+      restaurantes: [
+        { nome: 'Açaíze Gastronomia Paraense', descricao: 'Culinária regional', coords: [-1.4480, -48.4750] },
+        { nome: 'Pastelaria Flor de Jambu', descricao: 'Pastéis amazônicos', coords: [-1.4500, -48.4850] },
+        { nome: 'Lá em Casa', descricao: 'Comida caseira paraense', coords: [-1.4490, -48.4820] },
+        { nome: 'Remanso do Bosque', descricao: 'Alta gastronomia regional', coords: [-1.4350, -48.4640] },
+        { nome: 'Estação das Docas - Restaurantes', descricao: 'Vários restaurantes', coords: [-1.4545, -48.5030] },
+        { nome: 'Terrazzo Sunset', descricao: 'Vista para a Baía', coords: [-1.4560, -48.5065] },
+        { nome: 'Mercado de São Brás', descricao: 'Restaurantes populares', coords: [-1.4515, -48.4795] },
+        { nome: 'Mangal das Garças - Restaurante', descricao: 'Restaurante no parque', coords: [-1.4590, -48.5035] },
+        { nome: 'Point do Açaí', descricao: 'Açaí tradicional', coords: [-1.4520, -48.4880] },
+        { nome: 'Boteco das Onze', descricao: 'Petiscos regionais', coords: [-1.4495, -48.4835] }
+      ]
+    };
+
+    let map;
+    let currentCategory = '';
+    let userMarker = null;
+    let userLocation = null;
+    let destinationMarker = null;
+    let currentDestination = null;
+    let routeLine = null;
+    let allMarkers = [];
+    let waypoints = [];
+    let waypointMarkers = [];
+
+    function inicializarMapa() {
+      const belemCoords = [-1.4558, -48.4902];
+      const zoomLevel = 13;
+      
+      map = L.map('map').setView(belemCoords, zoomLevel);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      obterLocalizacao();
+    }
+
+    function obterLocalizacao() {
+      if (!navigator.geolocation) {
+        alert('Geolocalização não suportada pelo navegador');
+        return;
+      }
+
+      mostrarLoading(true);
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          if (userMarker) {
+            userMarker.setLatLng(userLocation);
+          } else {
+            userMarker = L.marker(userLocation, {
+              icon: L.divIcon({
+                className: 'user-marker',
+                html: '<div style="background: #FF9800; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"></div>',
+                iconSize: [20, 20]
+              })
+            }).addTo(map);
+            userMarker.bindPopup('📍 Você está aqui!');
+          }
+
+          map.setView(userLocation, 15);
+          mostrarLoading(false);
+        },
+        (error) => {
+          mostrarLoading(false);
+          let msg = 'Erro ao obter localização. ';
+          
+          if (error.code === 1) {
+            msg += 'Permita o acesso à localização.';
+          } else if (error.code === 2) {
+            msg += 'Localização indisponível.';
+          } else {
+            msg += 'Tempo esgotado.';
+          }
+          
+          console.error('Erro de geolocalização:', msg);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    function mostrarLista(categoria) {
+      currentCategory = categoria;
+      const listaContainer = document.getElementById('lista-container');
+      const listaTitulo = document.getElementById('lista-titulo');
+      const listaItems = document.getElementById('lista-items');
+      
+      const titulos = {
+        turisticos: 'Pontos turísticos',
+        praias: 'Praias',
+        hoteis: 'Hotéis',
+        restaurantes: 'Restaurantes'
+      };
+      
+      listaTitulo.textContent = titulos[categoria];
+      listaItems.innerHTML = '';
+      
+      const locais = locaisData[categoria];
+      locais.forEach((local) => {
+        const item = document.createElement('div');
+        item.className = 'local-item';
+        item.innerHTML = `
+          <div class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+          </div>
+          <div class="info">
+            <div class="nome">${local.nome}</div>
+            <div class="descricao">${local.descricao}</div>
+          </div>
+          <div class="arrow">›</div>
+        `;
+        
+        item.addEventListener('click', () => {
+          mostrarNoMapa(local);
+        });
+        
+        listaItems.appendChild(item);
+      });
+      
+      listaContainer.classList.add('active');
+      document.getElementById('main-menu').style.display = 'none';
+      document.querySelector('header').style.display = 'none';
+    }
+
+    function mostrarNoMapa(local) {
+      document.getElementById('lista-container').classList.remove('active');
+      abrirMapa(local);
+    }
+
+    function abrirMapa(localSelecionado = null) {
+      const mapContainer = document.getElementById('map-container');
+      mapContainer.classList.add('active');
+      
+      if (!map) {
+        inicializarMapa();
+      }
+      
+      // Sempre mostra o painel de controles quando o mapa abre
+      const mapControls = document.getElementById('mapControls');
+      mapControls.classList.add('active');
+      
+      if (localSelecionado) {
+        currentDestination = localSelecionado;
+        
+        if (destinationMarker) {
+          map.removeLayer(destinationMarker);
+        }
+        
+        destinationMarker = L.marker(localSelecionado.coords, {
+          icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          })
+        }).addTo(map);
+        
+        destinationMarker.bindPopup(`<b>${localSelecionado.nome}</b><br>${localSelecionado.descricao}`).openPopup();
+        
+        map.setView(localSelecionado.coords, 15);
+        
+        // Se tem localização do usuário, calcula a rota automaticamente
+        if (userLocation) {
+          setTimeout(() => {
+            calcularRota();
+          }, 500);
+        }
+      }
+      
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }
+
+    function calcularRota() {
+      if (!userLocation) {
+        alert('Localização do usuário não disponível. Aguarde ou ative o GPS.');
+        return;
+      }
+
+      if (!currentDestination && waypoints.length === 0) {
+        alert('Nenhum destino selecionado!');
+        return;
+      }
+
+      const modo = document.getElementById('modeSelect').value;
+      mostrarLoading(true);
+
+      let coords = [`${userLocation.lng},${userLocation.lat}`];
+      
+      waypoints.forEach(wp => {
+        coords.push(`${wp.coords[1]},${wp.coords[0]}`);
+      });
+      
+      if (currentDestination) {
+        coords.push(`${currentDestination.coords[1]},${currentDestination.coords[0]}`);
+      }
+
+      const url = `https://router.project-osrm.org/route/v1/${modo}/` +
+                  coords.join(';') + '?' +
+                  `overview=full&geometries=geojson&steps=true`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (data.code !== 'Ok') {
+            throw new Error('Rota não encontrada');
+          }
+
+          const route = data.routes[0];
+          const routeCoords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+
+          if (routeLine) {
+            map.removeLayer(routeLine);
+          }
+
+          routeLine = L.polyline(routeCoords, {
+            color: modo === 'driving' ? '#4CAF50' : '#2c5aa0',
+            weight: 6,
+            opacity: 0.8,
+            lineJoin: 'round'
+          }).addTo(map);
+
+          waypoints.forEach((wp, index) => {
+            const marker = L.marker(wp.coords, {
+              icon: L.divIcon({
+                className: 'waypoint-marker',
+                html: `<div style="background: #FFA500; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">${index + 1}</div>`,
+                iconSize: [30, 30]
+              })
+            }).addTo(map);
+            waypointMarkers.push(marker);
+          });
+
+          map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+
+          const distance = (route.distance / 1000).toFixed(1);
+          const duration = Math.round(route.duration / 60);
+          
+          let destinoNome = currentDestination ? currentDestination.nome : 'Múltiplos pontos';
+          if (waypoints.length > 0) {
+            destinoNome += ` (+${waypoints.length} parada${waypoints.length > 1 ? 's' : ''})`;
+          }
+          
+          document.getElementById('info-destino').textContent = destinoNome;
+          document.getElementById('info-distancia').textContent = distance + ' km';
+          document.getElementById('info-tempo').textContent = duration + ' min';
+          document.getElementById('info-modo').textContent = modo === 'driving' ? '🚗 Carro' : '🚶 A pé';
+          
+          // Mostra seção de informações
+          document.getElementById('routeInfoSection').style.display = 'block';
+          
+          gerarInstrucoes(route.legs);
+          
+          mostrarLoading(false);
+        })
+        .catch(error => {
+          console.error('Erro ao calcular rota:', error);
+          alert('Erro ao calcular rota. Tente novamente.');
+          mostrarLoading(false);
+        });
+    }
+
+    function gerarInstrucoes(legs) {
+      const instructionsList = document.getElementById('instructionsList');
+      instructionsList.innerHTML = '';
+      
+      const instrucoes = [];
+      
+      legs.forEach(leg => {
+        leg.steps.forEach(step => {
+          if (step.maneuver && step.maneuver.instruction) {
+            instrucoes.push({
+              text: step.maneuver.instruction,
+              distance: (step.distance / 1000).toFixed(2)
+            });
+          }
+        });
+      });
+      
+      if (instrucoes.length > 0) {
+        instrucoes.slice(0, 8).forEach((instr, index) => {
+          const stepDiv = document.createElement('div');
+          stepDiv.className = 'instruction-step';
+          stepDiv.innerHTML = `
+            <div class="step-number">${index + 1}</div>
+            <div class="step-text">${instr.text} (${instr.distance} km)</div>
+          `;
+          instructionsList.appendChild(stepDiv);
+        });
+        
+        if (instrucoes.length > 8) {
+          const moreDiv = document.createElement('div');
+          moreDiv.className = 'instruction-step';
+          moreDiv.innerHTML = `
+            <div class="step-number">+</div>
+            <div class="step-text">Mais ${instrucoes.length - 8} etapas...</div>
+          `;
+          instructionsList.appendChild(moreDiv);
+        }
+        
+        document.getElementById('routeInstructions').style.display = 'block';
+      } else {
+        document.getElementById('routeInstructions').style.display = 'none';
+      }
+    }
+
+    function limparRota() {
+      if (routeLine) {
+        map.removeLayer(routeLine);
+        routeLine = null;
+      }
+      
+      waypointMarkers.forEach(marker => {
+        map.removeLayer(marker);
+      });
+      waypointMarkers = [];
+      
+      waypoints = [];
+      atualizarListaWaypoints();
+      
+      document.getElementById('routeInfoSection').style.display = 'none';
+      document.getElementById('routeInstructions').style.display = 'none';
+    }
+
+    function adicionarWaypoint(local) {
+      waypoints.push(local);
+      atualizarListaWaypoints();
+    }
+
+    function removerWaypoint(index) {
+      waypoints.splice(index, 1);
+      atualizarListaWaypoints();
+      
+      if (routeLine) {
+        map.removeLayer(routeLine);
+        routeLine = null;
+      }
+      
+      waypointMarkers.forEach(marker => {
+        map.removeLayer(marker);
+      });
+      waypointMarkers = [];
+      
+      document.getElementById('routeInfoSection').style.display = 'none';
+    }
+
+    function atualizarListaWaypoints() {
+      const lista = document.getElementById('waypointsList');
+      const section = document.getElementById('waypointsSection');
+      lista.innerHTML = '';
+      
+      if (waypoints.length > 0) {
+        section.style.display = 'block';
+        waypoints.forEach((wp, index) => {
+          const item = document.createElement('div');
+          item.className = 'waypoint-item';
+          item.innerHTML = `
+            <span>${index + 1}. ${wp.nome}</span>
+            <button class="remove-btn" onclick="removerWaypoint(${index})">✕</button>
+          `;
+          lista.appendChild(item);
+        });
+      } else {
+        section.style.display = 'none';
+      }
+    }
+
+    function criarRotaPersonalizada() {
+      document.getElementById('lista-container').classList.remove('active');
+      
+      const mapContainer = document.getElementById('map-container');
+      mapContainer.classList.add('active');
+      
+      if (!map) {
+        inicializarMapa();
+      }
+      
+      // Sempre mostra o painel de controles
+      const mapControls = document.getElementById('mapControls');
+      mapControls.classList.add('active');
+      
+      limparTodosMarcadores();
+      
+      Object.keys(locaisData).forEach(categoria => {
+        locaisData[categoria].forEach(local => {
+          const cor = getCategoriaColor(categoria);
+          const marker = L.circleMarker(local.coords, {
+            radius: 8,
+            fillColor: cor,
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+          }).addTo(map);
+          
+          marker.bindPopup(`
+            <div style="min-width: 200px">
+              <h3 style="margin: 0 0 8px 0; color: #2c5aa0;">${local.nome}</h3>
+              <p style="margin: 0 0 10px 0; font-size: 14px;">${local.descricao}</p>
+              <button onclick="selecionarDestinoDoMapa('${categoria}', '${local.nome}')" 
+                      style="width: 100%; padding: 8px; border: none; border-radius: 8px; 
+                             background: #2c5aa0; color: white; cursor: pointer; font-weight: 600;">
+                Traçar Rota
+              </button>
+            </div>
+          `);
+          
+          allMarkers.push(marker);
+        });
+      });
+      
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }
+
+    window.selecionarDestinoDoMapa = function(categoria, nomeLocal) {
+      const local = locaisData[categoria].find(l => l.nome === nomeLocal);
+      if (local) {
+        if (currentDestination && waypoints.length < 5) {
+          adicionarWaypoint(local);
+          
+          const marker = L.marker(local.coords, {
+            icon: L.divIcon({
+              className: 'waypoint-temp-marker',
+              html: `<div style="background: #FFA500; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">${waypoints.length}</div>`,
+              iconSize: [30, 30]
+            })
+          }).addTo(map);
+          
+          marker.bindPopup(`<b>Parada ${waypoints.length}</b><br>${local.nome}`).openPopup();
+          
+          alert(`Ponto "${local.nome}" adicionado! ${5 - waypoints.length} paradas disponíveis.`);
+          
+          // Recalcula a rota automaticamente
+          if (userLocation) {
+            setTimeout(() => {
+              calcularRota();
+            }, 500);
+          }
+        } else if (waypoints.length >= 5) {
+          alert('Máximo de 5 paradas intermediárias atingido!');
+        } else {
+          currentDestination = local;
+          
+          if (destinationMarker) {
+            map.removeLayer(destinationMarker);
+          }
+          
+          destinationMarker = L.marker(local.coords, {
+            icon: L.icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41]
+            })
+          }).addTo(map);
+          
+          destinationMarker.bindPopup(`<b>Destino Final</b><br>${local.nome}`).openPopup();
+          
+          // Calcula a rota automaticamente
+          if (userLocation) {
+            setTimeout(() => {
+              calcularRota();
+            }, 500);
+          }
+        }
+      }
+    };
+
+    window.removerWaypoint = removerWaypoint;
+
+    function getCategoriaColor(categoria) {
+      const cores = {
+        turisticos: '#3498db',
+        praias: '#f39c12',
+        hoteis: '#9b59b6',
+        restaurantes: '#2ecc71'
+      };
+      return cores[categoria] || '#95a5a6';
+    }
+
+    function limparTodosMarcadores() {
+      allMarkers.forEach(marker => {
+        map.removeLayer(marker);
+      });
+      allMarkers = [];
+      
+      if (destinationMarker) {
+        map.removeLayer(destinationMarker);
+        destinationMarker = null;
+      }
+    }
+
+    function voltarDaLista() {
+      document.getElementById('lista-container').classList.remove('active');
+      document.getElementById('main-menu').style.display = 'flex';
+      document.querySelector('header').style.display = 'block';
+    }
+
+    function voltarMenu() {
+      const mapContainer = document.getElementById('map-container');
+      mapContainer.classList.remove('active');
+      
+      limparRota();
+      document.getElementById('mapControls').classList.remove('active');
+      
+      if (destinationMarker) {
+        map.removeLayer(destinationMarker);
+        destinationMarker = null;
+      }
+      currentDestination = null;
+      
+      if (allMarkers.length > 0) {
+        limparTodosMarcadores();
+      }
+      
+      if (currentCategory) {
+        document.getElementById('lista-container').classList.add('active');
+      } else {
+        document.getElementById('main-menu').style.display = 'flex';
+        document.querySelector('header').style.display = 'block';
+      }
+    }
+
+    function mostrarLoading(show) {
+      const overlay = document.getElementById('loadingOverlay');
+      if (show) {
+        overlay.classList.add('active');
+      } else {
+        overlay.classList.remove('active');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('pontos-turisticos').addEventListener('click', () => {
+        mostrarLista('turisticos');
+      });
+      
+      document.getElementById('praias').addEventListener('click', () => {
+        mostrarLista('praias');
+      });
+      
+      document.getElementById('hoteis').addEventListener('click', () => {
+        mostrarLista('hoteis');
+      });
+      
+      document.getElementById('restaurantes').addEventListener('click', () => {
+        mostrarLista('restaurantes');
+      });
+      
+      document.getElementById('criar-rota').addEventListener('click', () => {
+        currentCategory = '';
+        criarRotaPersonalizada();
+      });
+      
+      document.getElementById('back-list-button').addEventListener('click', voltarDaLista);
+      document.getElementById('back-button').addEventListener('click', voltarMenu);
+      
+      document.getElementById('calcularRotaBtn').addEventListener('click', calcularRota);
+      document.getElementById('limparRotaBtn').addEventListener('click', limparRota);
+      
+      document.getElementById('locateBtn').addEventListener('click', () => {
+        if (userLocation && map) {
+          map.setView(userLocation, 16);
+          if (userMarker) {
+            userMarker.openPopup();
+          }
+        } else {
+          obterLocalizacao();
+        }
+      });
+
+      // Toggle do painel de controles - clica no header inteiro ou no botão
+      const controlsHeader = document.getElementById('controlsHeader');
+      controlsHeader.addEventListener('click', () => {
+        const controls = document.getElementById('mapControls');
+        controls.classList.toggle('minimized');
+      });
+    });
+  </script>
+
+</body>
+</html>
