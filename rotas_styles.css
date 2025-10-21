@@ -1,0 +1,563 @@
+/* Reset e Configurações Gerais */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", Arial, sans-serif;
+  background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(161, 158, 158, 0.85)),
+    url('fundo.jpg') repeat center center;
+  background-size: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  margin: 20px 0;
+  text-align: center;
+}
+
+header img {
+  width: 130px;
+}
+
+/* Menu Principal */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 80%;
+  max-width: 360px;
+}
+
+.menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  padding: 14px 22px;
+  border-radius: 30px;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.menu-item:hover {
+  transform: scale(1.04);
+  box-shadow: 3px 6px 12px rgba(0,0,0,0.25);
+  filter: brightness(1.1);
+}
+
+.azul {
+  background: linear-gradient(135deg, #00bfe8, #0284a8);
+}
+
+.vermelho {
+  background: linear-gradient(135deg, #f23c3c, #c72a2a);
+}
+
+.verde {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.menu-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('botao.jpg') repeat center;
+  background-size: 120px;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  border-radius: 30px;
+}
+
+.menu-item img {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.2);
+  padding: 5px;
+  z-index: 1;
+}
+
+.menu-item span {
+  z-index: 1;
+}
+
+/* Container de Lista */
+#lista-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(161, 158, 158, 0.85)),
+    url('fundo.jpg') repeat center center;
+  background-size: contain;
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 80px 20px 20px 20px;
+}
+
+#lista-container.active {
+  display: block;
+}
+
+#lista-titulo {
+  color: white;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+}
+
+#lista-items {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Itens da Lista */
+.local-item {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.local-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+.local-item .icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #f23c3c, #c72a2a);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.local-item .icon svg {
+  width: 28px;
+  height: 28px;
+  fill: white;
+}
+
+.local-item .info {
+  flex: 1;
+}
+
+.local-item .nome {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.local-item .descricao {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.local-item .arrow {
+  font-size: 1.5rem;
+  color: #95a5a6;
+}
+
+/* Container do Mapa */
+#map-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 1000;
+}
+
+#map-container.active {
+  display: block;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Botões de Voltar */
+#back-button,
+#back-list-button {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: linear-gradient(135deg, #00bfe8, #0284a8);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.3);
+  transition: all 0.25s ease;
+}
+
+#back-button:hover,
+#back-list-button:hover {
+  transform: scale(1.05);
+  box-shadow: 3px 6px 12px rgba(0,0,0,0.4);
+}
+
+/* Controles do Mapa */
+.map-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.map-controls.minimized {
+  width: auto;
+  padding: 10px 15px;
+  overflow: hidden;
+}
+
+.map-controls.minimized .controls-content {
+  display: none;
+}
+
+.map-controls.active {
+  display: flex;
+}
+
+.controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.map-controls.minimized .controls-header {
+  margin-bottom: 0;
+}
+
+.toggle-controls-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 18px;
+  color: #2c3e50;
+  transition: transform 0.3s ease;
+}
+
+.toggle-controls-btn:hover {
+  transform: scale(1.1);
+}
+
+.map-controls.minimized .toggle-controls-btn {
+  transform: rotate(180deg);
+}
+
+.map-controls h4 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controls-section {
+  padding: 15px 0;
+  border-top: 2px solid #ecf0f1;
+}
+
+.controls-section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.controls-section h5 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.map-controls select {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.map-controls button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-calcular {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+}
+
+.btn-calcular:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.4);
+}
+
+.btn-limpar {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+}
+
+.btn-limpar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+.btn-adicionar {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.btn-adicionar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+/* Waypoints */
+.waypoints-list {
+  max-height: 150px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px 0;
+}
+
+.waypoint-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.waypoint-item .remove-btn {
+  background: #e74c3c;
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Informações da Rota */
+.route-info {
+  display: none;
+}
+
+.route-info p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  color: #555;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.route-info strong {
+  color: #2c3e50;
+}
+
+/* Instruções de Rota */
+.route-instructions {
+  margin-top: 10px;
+}
+
+.route-instructions h5 {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.instruction-step {
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 8px;
+}
+
+.instruction-step .step-number {
+  background: #3498db;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.instruction-step .step-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* Botão de Localização */
+.locate-btn {
+  position: absolute;
+  bottom: 90px;
+  right: 20px;
+  z-index: 1001;
+  width: 50px;
+  height: 50px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.locate-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  background: #00bfe8;
+}
+
+.locate-btn:hover i {
+  color: white;
+}
+
+.locate-btn i {
+  font-size: 20px;
+  color: #00bfe8;
+  transition: color 0.2s;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-overlay.active {
+  display: flex;
+}
+
+.loading-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #00bfe8;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .map-controls {
+    right: 10px;
+    top: 10px;
+    width: calc(100vw - 20px);
+  }
+
+  .locate-btn {
+    bottom: 90px;
+    right: 10px;
+  }
+
+  #back-button,
+  #back-list-button {
+    bottom: 20px;
+    left: 10px;
+  }
+}
